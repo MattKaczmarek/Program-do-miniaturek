@@ -1,6 +1,6 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog, QPushButton, QVBoxLayout, QWidget, QMessageBox
-from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QWidget, QMessageBox, QPushButton
+from PySide6.QtGui import QIcon, QAction
 from PySide6.QtCore import Qt
 import os
 import shutil
@@ -12,10 +12,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Photo Manager - Python")
         self.setGeometry(100, 100, 500, 300)
         
-        # Ciemny motyw (prosta metoda – ustawić styleSheet)
+        # Ciemny motyw
         self.setStyleSheet("QMainWindow { background-color: #1E1E1E; color: white; }")
 
-        # Trzymamy ścieżki w zmiennych (lub w pliku konfiguracyjnym)
         self.photosPath = None
         self.cutPath = None
 
@@ -70,17 +69,14 @@ class MainWindow(QMainWindow):
         os.makedirs(allegroDir, exist_ok=True)
         os.makedirs(vintedDir, exist_ok=True)
 
-        # Szukamy folderów Z (x)
         for item in os.listdir(self.photosPath):
             fullPath = os.path.join(self.photosPath, item)
             if os.path.isdir(fullPath) and item.startswith("Z (") and item.endswith(")"):
-                # Kopiowanie do Allegro (z miniaturkami)
                 allegroZDir = os.path.join(allegroDir, item)
                 copy_directory(fullPath, allegroZDir)
 
                 folderIndex = get_number_from_folder_name(item)
                 if folderIndex > 0:
-                    # przeniesienie plików "0 (x)-Photoroom"
                     pattern = f"0 ({folderIndex})-Photoroom"
                     for f in os.listdir(self.cutPath):
                         if f.startswith(pattern):
@@ -88,11 +84,9 @@ class MainWindow(QMainWindow):
                             dstFile = os.path.join(allegroZDir, f)
                             shutil.copy2(srcFile, dstFile)
 
-                # Kopiowanie do Vinted (bez miniaturek)
                 vintedZDir = os.path.join(vintedDir, item)
                 copy_directory(fullPath, vintedZDir)
 
-                # Usunięcie oryginalnego folderu
                 shutil.rmtree(fullPath)
 
         QMessageBox.information(self, "Sukces", "Przeniesiono miniaturki do Allegro i skopiowano foldery do Vinted.")
@@ -137,7 +131,6 @@ def add_folder_to_zip(zipf, folder_path, arc_prefix):
             zipf.write(abs_file_path, os.path.join(arc_prefix, rel_path))
 
 def get_number_from_folder_name(name):
-    # "Z (2)" -> 2
     start = name.find("(")
     end = name.find(")")
     if start != -1 and end != -1:
